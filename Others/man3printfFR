@@ -1,0 +1,408 @@
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+NOM
+       printf,  fprintf,  sprintf,  snprintf,  vprintf, vfprintf,
+       vsprintf, vsnprintf - Formatage des sorties.
+
+SYNOPSIS
+       #include <stdio.h>
+
+       int printf (const char *format, ...);
+       int fprintf (FILE *stream, const char *format, ...);
+       int sprintf (char *str, const char *format, ...);
+       int snprintf (char *str, size_t size, const char  *format,
+       ...);
+
+       #include <stdarg.h>
+
+       int vprintf (const char *format, va_list ap);
+       int  vfprintf  (FILE  *stream, const char *format, va_list
+       ap);
+       int vsprintf (char *str, const char *format, va_list ap);
+       int vsnprintf (char *str, size_t size, const char *format,
+       va_list ap);
+
+DESCRIPTION
+       Les  fonctions de la famille printf produisent des sorties
+       en accord avec le format décrit plus  bas.  Les  fonctions
+       printf et vprintf écrivent leur sortie sur stdout, le flux
+       de sortie standard.  fprintf et vfprintf écrivent  sur  le
+       flux  stream  indiqué.   sprintf,  snprintf,  vsprintf  et
+       vsnprintf écrivent leurs sorties dans la  chaîne  de  car­
+       actères str.
+
+       Ces  fonctions créent leurs sorties sous le contrôle d'une
+       chaîne de format qui indique les  conversions  à  apporter
+       aux arguments suivants (ou accessibles à travers les argu­
+       ments de taille variable de stdarg(3)).
+
+       Ces fonctions renvoient le nombre de caractères  imprimés,
+       sans compter le caractère nul `\0' final dans les chaînes.
+       snprintf et vsnprintf n'écrivent pas plus de  size  octets
+       (y  compris le '\0' final), et renvoient -1 si la sortie a
+       été tronquée à cause de cette limite.
+
+       La chaîne de format est composée d'indicateurs : les  car­
+       actères ordinaires (différents de %), qui sont copiés sans
+       modification sur la sortie, et les spécifications de  con­
+       version.   Les  spécifications  de  conversion sont intro­
+       duites par le caractère %.  Les arguments  doivent  corre­
+       spondre  correctement (après les promotions de types) avec
+       les indicateurs de conversion.
+
+       Après  le  caractère  %,  les  éléments  suivant   doivent
+       apparaître, dans l'ordre :
+
+       ·      Zéro ou plusieurs attributs :
+
+
+
+Linux                     25 Avril 1998                         1
+
+
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+              #      indique que la valeur doit être convertie en
+                     une autre forme.  Pour les conversions c, d,
+                     i,  n,  p,  s,  et  u  cette  option n'a pas
+                     d'effet.  Pour la conversion o la  précision
+                     est  incrémentée pour forcer le premier car­
+                     actère de la chaîne de  sortie  à  valoir  0
+                     (sauf  si une valeur nulle est imprimée avec
+                     une précision explicite  de  0).   Pour  les
+                     conversions  x  et  X  une  valeur non nulle
+                     reçoit le préfixe `0x' (ou `0X' pour l'indi­
+                     cateur X).  Pour les conversions e, E, f, g,
+                     et G  le  résultat  contiendra  toujours  un
+                     point  décimal  même  si  aucun chifre ne le
+                     suit (normalement, un  point  décimal  n'est
+                     présent  avec  ces  conversions  que  si des
+                     décimales le suivent).  Pour les conversions
+                     g  et  G  les  zéros  en  tête  ne  sont pas
+                     éliminés,  contrairement   au   comportement
+                     habituel.
+
+              0      indique  le remplissage avec des zéros. Pour
+                     toutes les conversions sauf n, la valeur est
+                     complétée  à  gauche  avec  des zéros plutot
+                     qu'avec des espaces.  Si une  précision  est
+                     fournie avec une conversion numérique (d, i,
+                     o, u, i, x, et X), l'attribut 0 est  ignoré.
+
+              -      (un attribut de largeur négatif) indique que
+                     la valeur doit être justifiée sur la  limite
+                     gauche  du champ. Sauf pour la conversion n,
+                     les valeurs sont complétées à droite par des
+                     espaces, plutôt qu'a gauche par des zéros ou
+                     des blancs.   Un  attribut  -  surcharge  un
+                     attribut 0 si les deux sont fournis.
+
+              ´ ´    (un  espace)  indique qu'un espace doit être
+                     laissé avant un nombre positif  produit  par
+                     une  conversion signée (d, e, E, f, g, G, ou
+                     i).
+
+              +      indique que  le  signe  doit  toujours  être
+                     imprimé avant un nombre produit par une con­
+                     version signée. Un attribut +  surcharge  un
+                     attribut  'espace' si les deux sont fournis.
+
+              '      indique  que  les  chiffres  d'un   argument
+                     numérique  doivent  être groupés en fonction
+                     de la localisation. Remarquez  que  de  nom­
+                     breuses  versions  de  gcc n'accepte pas cet
+                     attribut et déclencheront  un  avertissement
+                     (warning).
+
+       ·      Un nombre optionnel, indiquant une largeur minimale
+              de champ. Si la valeur convertie  occupe  moins  de
+
+
+
+Linux                     25 Avril 1998                         2
+
+
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+              caractères  que  cette largeur, elle sera complétée
+              par des espaces à gauche (ou à droite si l'attribut
+              d'alignement à gauche a été fourni).
+
+       ·      Une  précision eventuelle, sous la forme d'un point
+              (`.')  suivi  par  un  nombre.  Si  ce  nombre  est
+              absent,   la   précision  est  fixée  à  0.   Cette
+              précision indique un nombre minimum de  chiffres  à
+              faire  apparaître  lors des conversions d, i, o, u,
+              x, et X, le nombre de décimales à faire  apparaître
+              pour  les conversions e, E, et f, le nombre maximum
+              de chiffres significatifs pour g et G, et le nombre
+              maximum de caractères à imprimer pour la conversion
+              s.
+
+       ·      Le caractère optionnel h, indiquant que la  conver­
+              sion  d,  i, o, u, x, ou X suivante correspond à un
+              argument short int ou unsigned short int, ou que la
+              conversion  n  suivante  correspond  à  un argument
+              pointeur sur un short int.
+
+       ·      Le caractère optionnel l (elle)  indiquant  que  la
+              conversion  d, i, o, u, x, ou X suivante s'applique
+              à un argument long int ou unsigned long int, ou que
+              la  conversion  n suivante correspond à un pointeur
+              sur un long int.  Linux  fournit  une  possibilité,
+              non  conforme  ANSI,  d'utiliser  deux  attributs l
+              comme synonyme à  q  ou  L.   Ainsi  ll  peut  être
+              utilisé  avec  les  conversions  de  nombres réels.
+              Cette méthode est néanmoins fortement déconseillée.
+
+       ·      Le caractère L indiquant que la conversion e, E, f,
+              g, ou G suivante correspond à un argument long dou­
+              ble, ou que la conversion d, i, o, u, x, ou X suiv­
+              ante correspond à un argument long long.  Remarquez
+              que  long  long  n'est  pas  spécifié par ANSI C et
+              n'est donc pas portable sur  toutes  les  architec­
+              tures.
+
+       ·      Le  caractère  optionnel q.  Il est équivalent à L.
+              Voir  les  sections  STANDARDS  et  BUGS  pour  des
+              détails sur l'utilisation de ll, L, et q.
+
+       ·      Un caractère Z indiquant que la conversion d'entier
+              suivante (d, i, o, u, i, x, et X), correspond à  un
+              argument size_t.
+
+       ·      Un  caractère  indiquant  le  type  de conversion à
+              appliquer.
+
+       Le champ de largeur ou de précision,  ou  les  deux,  sont
+       parfois  indiqués  par  un  astérisque `*' à la place d'un
+       nombre.  Dans ce cas, un argument int fournit la valeur du
+       champ  largeur  ou précision. Un champ de largeur négative
+
+
+
+Linux                     25 Avril 1998                         3
+
+
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+       est traité de manière identique à l'argument  d'ajustement
+       à gauche avec une largeur positive. Une précision négative
+       est ignorée.
+
+       Les indicateurs de  conversion,  et  leurs  significations
+       sont :
+
+       diouxX L'argument  int  (ou  une  variante appropriée) est
+              convertie en un chiffre décimal signé (d et i),  un
+              chiffre  octal  non-signé  (o),  un chiffre décimal
+              non-signé (u), un chiffre héxadécimal non-signé  (x
+              et  X).  Les lettres abcdef sont utilisées pour les
+              conversions  avec  x,  les  lettres   ABCDEF   sont
+              utilisées   pour   les   conversions  avec  X.   La
+              précision, si elle est indiquée,  donne  un  nombre
+              minimal  de  chiffres  à  faire  apparaître.  Si la
+              valeur convertie nécessite moins de chiffres,  elle
+              est complétée à gauche avec des zéros.
+
+       eE     L'argument  réel,  de  type  double, est arrondi et
+              présenté avec la notation scientifique  [-]9.999e99
+              dans  lequel  se  trouve un chiffre avant le point,
+              puis un nombre de décimales  égal  à  la  précision
+              demandée.  Si  la  précision  n'est  pas  indiquée,
+              l'affichage contiendra 6 décimales. Si la précision
+              vaut  zéro, il n'y a pas de point décimal. Une con­
+              version E utilise la lettre E (plutôt que  e)  pour
+              introduire  l'exposant.  Celui-ci contient toujours
+              au moins deux chiffres.  Si la valeur affichée  est
+              nulle, son exposant est 00.
+
+       f      L'argument  réel,  de  type double, est arrondi, et
+              présenté avec la notation classique [-]999.999,  où
+              le  nombre  de  décimales  est  égal à la précision
+              réclamée.  Si  la  précision  n'est  pas  indiquée,
+              l'affichage   se  fera  avec  6  décimales.  Si  la
+              précision vaut zéro,  aucun  point  n'est  affiché.
+              Lorsque  le  point  est affiché, il y a toujours au
+              moins un chiffre devant.
+
+       g      L'argument réel, de type double,  est  converti  en
+              style  f  ou  e  (ou  E  pour  la  conversion G) La
+              précision indique le nombre de décimales significa­
+              tives.  Si la précision est absente, une valeur par
+              défaut de 6 est utilisée. Si la précision  vaut  0,
+              elle  est  considérée  comme valant 1.  La notation
+              scientifique  e  est  utilisée  si  l'exposant  est
+              inférieur  à -4 ou supérieur ou égal à la précision
+              démandée. Les zéros en fin de partie décimale  sont
+              supprimés.  Un point decimal n'est affiché que s'il
+              est suivi d'au moins un chiffre.
+
+       c      L'argument entier, de type int, est converti en  un
+              unsigned  char,  et  le caractère correspondant est
+
+
+
+Linux                     25 Avril 1998                         4
+
+
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+              affiché.
+
+       s      L'argument de type ``char *'' est supposé  être  un
+              pointeur sur un tableau de caractères (pointeur sur
+              une chaîne). Les caractères du tableau sont  écrits
+              jusqu'au  caractère  NUL final, non compris. Si une
+              précision est indiquée,  seul  ce  nombre  de  car­
+              actères  sont écrits. Si une précision est fournie,
+              il n'y  a  pas  besoin  de  caractère  nul.  Si  la
+              précision   n'est   pas  donnée,  ou  si  elle  est
+              supérieure à la longueur de la chaîne, le caractère
+              NUL final est nécessaire.
+
+       p      L'argument   pointeur,  du  type  ``void  *'',  est
+              affiché en héxadécimal, comme avec %#x ou %#lx.
+
+       n      Le nombre de caractères déjà écrits est stocké dans
+              l'entier  indiqué  par  l'argument pointeur de type
+              ``int *''.  Aucun argument n'est converti.
+
+       %      Un caractère `%' est écrit. Il n'y a pas de conver­
+              sion. L'indicateur complet est `%%'.
+
+       En  aucun  cas  une petite largeur de champ ne causera une
+       troncature d'un champ.  Si le résultat  de  la  conversion
+       est  plus  grand  que  le champ prévu, celui-ci est étendu
+       pour contenir le résultat.
+
+
+EXEMPLES
+       Pour  afficher  une  date  et  une  heure  sous  la  forme
+       `Dimanche  10  Novembre,  23:15',  ou jour_semaine et mois
+       sont des pointeurs sur des chaînes :
+              #include <stdio.h>
+              fprintf (stdout, "%s %d %s, %.2d:%.2d\n",
+                    jour_semaine, jour, mois, heure, minute);
+
+       Pour afficher Pi avec 5 décimales :
+              #include <math.h>
+              #include <stdio.h>
+              fprintf (stdout, "pi = %.5f\n", 4 * atan(1.0));
+
+       Pour allouer 128  octets  de  chaînes  de  caractères,  et
+       écrire dedans :
+              #include <stdio.h>
+              #include <stdlib.h>
+              #include <stdarg.h>
+              char *
+              newfmt (const char *fmt, ...)
+              {
+                char *p;
+                va_list ap;
+                if ((p = malloc(128)) == NULL)
+                  return (NULL);
+
+
+
+Linux                     25 Avril 1998                         5
+
+
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+                va_start(ap, fmt);
+                (void) vsnprintf(p, 128, fmt, ap);
+                va_end(ap);
+                return (p);
+              }
+
+VOIR AUSSI
+       printf(1), scanf(3)
+
+STANDARDS
+       Les fonctions fprintf, printf, sprintf, vprintf, vfprintf,
+       et vsprintf sont  conformes  à  ANSI  C3.159-1989  (``ANSI
+       C'').
+
+       L'attribut  q  est une notation de BSD 4.4 pour long long,
+       alors que ll ou l'utilisation de L  pour  les  conversions
+       d'entiers est une extension GNU.
+
+       Les  versions  Linux  de  ces fonctions sont basées sur la
+       bibliotheque libio GNU.  Jetez un oeil à la  documentation
+       info de la libc (glibc-1.08) GNU pour une description plus
+       précise.
+
+BUGS
+       Certaines conversions de nombres réels, sous  Linux,  peu­
+       vent causer des fuites de mémoire.
+
+       Toutes  les  fonctions  sont  totalement  conformes à ANSI
+       C3.159-1989, mais  proposent  des  attributs  q,  Z  et  '
+       supplémentaires, ainsi qu'un comportement additionnel pour
+       les attributs L et l.  Ces derniers comportements  doivent
+       être  considérés  comme  des  bugs,  car ils modifient des
+       attributs définis par ANSI C3.159-1989.
+
+       L'effet d'ajustement du format %p  avec  des  zéros  (soit
+       avec  l'attribut  0,  soit en indiquant une précision), et
+       l'effet bénin (en clair : aucun) de l'attribut #  sur  les
+       conversions  %n et %p sont non standards. De telles combi­
+       naisons doivent être évitées.
+
+       Certaines combinaisons d'attributs ANSI  C  n'ont  pas  de
+       sens  (par exemple %Ld).  Bien qu'elles aient un comporte­
+       ment bien défini sous Linux, ce n'est pas  obligatoirement
+       le   cas   sur  d'autres  architectures.   Il  vaut  mieux
+       n'utiliser que les attributs définis par ANSI C, par exem­
+       ple,  l'utilisation  de q est preferable à L pour les con­
+       versions diouxX ou ll.
+
+       L'utilisation de l'attribut q n'est pas la même  que  sous
+       BSD  4.4,  où il peut être utilisé pour les conversions de
+       nombres réels de manière identique à L.
+
+       Comme sprintf et vsprintf ne font pas de suppositions  sur
+       la  longueur  des  chaînes,  le  programme  appelant  doit
+
+
+
+Linux                     25 Avril 1998                         6
+
+
+
+
+
+PRINTF(3)          Manuel du programmeur Linux          PRINTF(3)
+
+
+       s'assurer de ne pas déborder l'espace  d'adressage.  C'est
+       souvent difficile.
+
+
+TRADUCTION
+       Christophe Blaess, 1997.
